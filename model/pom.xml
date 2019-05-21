@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- =============================================================== -->
+    <!-- Parent Project -->
+    <!-- =============================================================== -->
+    <parent>
+        <artifactId>librarymanager-batch</artifactId>
+        <groupId>com.antazri</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- =============================================================== -->
+    <!-- Project -->
+    <!-- =============================================================== -->
+    <artifactId>model</artifactId>
+
+    <!-- Global informations -->
+    <name>model</name>
+    <url>http://librarymanager.gouv.fr</url>
+
+    <!-- =============================================================== -->
+    <!-- Properties -->
+    <!-- =============================================================== -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <!-- =============================================================== -->
+    <!-- Dependencies Management -->
+    <!-- =============================================================== -->
+    <dependencies>
+        <!-- Spring Batch dependency -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+
+        <!-- Apache CXF dependencies -->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+        </dependency>
+
+        <!-- JUnit dependency -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!-- =============================================================== -->
+    <!-- Build & Plugins Management -->
+    <!-- =============================================================== -->
+    <build>
+        <finalName>model</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <sourceRoot>${basedir}/src/main/java/</sourceRoot>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <wsdl>http://localhost:8090/librarymanager/ws/auth?wsdl</wsdl>
+                                    <serviceName>AuthenticationService</serviceName>
+                                    <extraargs>
+                                        <extraarg>-client</extraarg>
+                                        <!-- <extraarg>-p</extraarg>
+                                         <extraarg>com.antazri.generated.auth</extraarg>
+                                         <extraarg>-autoNameResolution</extraarg>-->
+                                    </extraargs>
+                                </wsdlOption>
+                                <wsdlOption>
+                                    <wsdl>http://localhost:8090/librarymanager/ws/author?wsdl</wsdl>
+                                    <serviceName>AuthorManagementService</serviceName>
+                                    <extraargs>
+                                        <extraarg>-client</extraarg>
+                                        <!--<extraarg>-p</extraarg>
+                                        <extraarg>com.antazri.generated.author</extraarg>
+                                        <extraarg>-autoNameResolution</extraarg>-->
+                                    </extraargs>
+                                </wsdlOption>
+                                <wsdlOption>
+                                    <wsdl>http://localhost:8090/librarymanager/ws/book?wsdl</wsdl>
+                                    <serviceName>BookManagementService</serviceName>
+                                    <extraargs>
+                                        <extraarg>-client</extraarg>
+                                        <!--<extraarg>-p</extraarg>
+                                        <extraarg>com.antazri.generated.book</extraarg>
+                                        <extraarg>-autoNameResolution</extraarg>-->
+                                    </extraargs>
+                                </wsdlOption>
+                                <wsdlOption>
+                                    <wsdl>http://localhost:8090/librarymanager/ws/category?wsdl</wsdl>
+                                    <serviceName>CategoryManagementService</serviceName>
+                                    <extraargs>
+                                        <extraarg>-client</extraarg>
+                                        <!--<extraarg>-p</extraarg>
+                                        <extraarg>com.antazri.generated.category</extraarg>
+                                        <extraarg>-autoNameResolution</extraarg>-->
+                                    </extraargs>
+                                </wsdlOption>
+                                <wsdlOption>
+                                    <wsdl>http://localhost:8090/librarymanager/ws/loan?wsdl</wsdl>
+                                    <serviceName>LoanManagementService</serviceName>
+                                    <extraargs>
+                                        <extraarg>-client</extraarg>
+                                        <!--<extraarg>-p</extraarg>
+                                        <extraarg>com.antazri.generated.loan</extraarg>
+                                        <extraarg>-autoNameResolution</extraarg>-->
+                                    </extraargs>
+                                </wsdlOption>
+                                <wsdlOption>
+                                    <wsdl>http://localhost:8090/librarymanager/ws/member?wsdl</wsdl>
+                                    <serviceName>MemberManagementService</serviceName>
+                                    <extraargs>
+                                        <extraarg>-client</extraarg>
+                                        <!--<extraarg>-p</extraarg>
+                                        <extraarg>com.antazri.generated.member</extraarg>
+                                        <extraarg>-autoNameResolution</extraarg>-->
+                                    </extraargs>
+                                </wsdlOption>
+                                <wsdlOption>
+                                    <wsdl>http://localhost:8090/librarymanager/ws/reminder?wsdl</wsdl>
+                                    <serviceName>ReminderService</serviceName>
+                                    <extraargs>
+                                        <extraarg>-client</extraarg>
+                                        <!--<extraarg>-p</extraarg>
+                                        <extraarg>com.antazri.generated.member</extraarg>
+                                        <extraarg>-autoNameResolution</extraarg>-->
+                                    </extraargs>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

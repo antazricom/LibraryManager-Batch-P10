@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:property="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/batch
+        http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+    <context:component-scan base-package="com.antazri.batch" />
+
+    <!-- =============================================================== -->
+    <!-- Fichier de configuration & Import-->
+    <!-- =============================================================== -->
+    <context:property-placeholder location="classpath:/com/antazri/batch/mail/sender/config.properties" />
+    <import resource="classpath*:/**/applicationContext-model.xml"/>
+
+    <!-- =============================================================== -->
+    <!-- Configuration du batch -->
+    <!-- =============================================================== -->
+    <!-- Job Execution -->
+
+    <!-- JobRepository -->
+    <bean id="mapJobRepositoryFactory" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+        <property name="transactionManager" ref="transactionManager" />
+    </bean>
+
+    <!-- JobLauncher -->
+    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository" />
+    </bean>
+
+    <!-- JobBuilderFactory -->
+    <bean id="jobBuilderFactory" class="org.springframework.batch.core.configuration.annotation.JobBuilderFactory">
+        <constructor-arg ref="jobRepository" />
+    </bean>
+
+    <!-- StepBuilderFactory -->
+    <bean id="stepBuilderFactory" class="org.springframework.batch.core.configuration.annotation.StepBuilderFactory">
+        <constructor-arg ref="jobRepository" />
+        <constructor-arg ref="transactionManager" />
+    </bean>
+
+    <!-- TransactionManager -->
+    <bean id="transactionManager" class=
+            "org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
+
+    <!-- =============================================================== -->
+    <!-- Configuration des Job -->
+    <!-- =============================================================== -->
+
+    <!-- =============================================================== -->
+    <!-- Beans -->
+    <!-- =============================================================== -->
+    <!-- Reader -->
+    <bean id="webserviceReader" class="com.antazri.batch.step.reader.WebserviceReader" />
+
+    <!-- Writer -->
+    <bean id="sendEmailWriter" class="com.antazri.batch.step.writer.SendEmailWriter" />
+
+    <!-- Job -->
+    <bean id="sendMailJob" class="com.antazri.batch.job.SendMailJob" />
+
+    <!-- Processor -->
+    <bean id="emailPropertiesProcessor" class="com.antazri.batch.step.processor.EmailPropertiesProcessor" />
+
+    <!-- =============================================================== -->
+    <!-- Configuration du MailService -->
+    <!-- =============================================================== -->
+    <!-- Sender -->
+    <bean id="mailSender" class="com.antazri.batch.mail.sender.MailSenderConfig">
+        <constructor-arg name="host" value="${spring.mail.host}" />
+        <constructor-arg name="port" value="${spring.mail.port}" />
+        <constructor-arg name="username" value="${spring.mail.username}" />
+        <constructor-arg name="password" value="${spring.mail.password}" />
+    </bean>
+
+    <!-- Service -->
+    <bean id="mailService" class="com.antazri.batch.mail.service.MailService" />
+
+</beans>
