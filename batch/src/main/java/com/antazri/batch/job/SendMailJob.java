@@ -5,16 +5,21 @@ import com.antazri.batch.step.reader.WebserviceReader;
 import com.antazri.batch.step.writer.SendEmailWriter;
 import com.antazri.batch.utils.EmailProperties;
 import com.antazri.generated.batch.Loan;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepContribution;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,9 +47,14 @@ public class SendMailJob {
     @Autowired
     private SendEmailWriter sendEmailWriter;
 
-    private List<Loan> loanList = new ArrayList<>();
+    @Autowired
+    private JobLauncher jobLauncher;
 
-    private List<EmailProperties> emailPropertiesList = new ArrayList<>();
+    private List<Loan> loanList;
+
+    private List<EmailProperties> emailPropertiesList;
+
+    private static final Logger logger = LogManager.getLogger(SendMailJob.class);
 
     /**
      * La méthode doRequestWebService envoi une requête au WebService, via le WebServiceReader, afin de récupérer une
@@ -56,6 +66,7 @@ public class SendMailJob {
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
+                        loanList = new ArrayList<>();
                         loanList = webserviceReader.findLateLoansFromWebService();
                         return RepeatStatus.FINISHED;
                     }
@@ -72,6 +83,7 @@ public class SendMailJob {
                 .tasklet(new Tasklet() {
                     @Override
                     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
+                        emailPropertiesList = new ArrayList<>();
                         for (Loan loan : loanList) {
                             emailPropertiesList.add(emailPropertiesProcessor.process(loan));
                         }
@@ -102,11 +114,26 @@ public class SendMailJob {
      * @return
      */
     public Job doBatchJob() {
+        logger.info("Lancement du Batch");
         return jobBuilderFactory.get("batchJob")
                 .start(doRequestWebService())
                 .next(doProcessMailProperties())
                 .next(doSendMail())
                 .build();
+    }
+
+//    @Scheduled(cron = "*/10 * * * * *")
+    @Scheduled(cron = "0 0 8-10 * * *")
+    public void runJob() throws Exception {
+        logger.info(emailPropertiesList);
+        JobParametersBuilder parameters = new JobParametersBuilder();
+        parameters.addString("jobID", String.valueOf(System.currentTimeMillis()));
+
+        try {
+            JobExecution execution = jobLauncher.run(doBatchJob(), parameters.toJobParameters());
+        } catch (Exception pE) {
+            logger.fatal("Le Batch n'a pas pu se lancer : " + pE.getCause());
+        }
     }
 
 

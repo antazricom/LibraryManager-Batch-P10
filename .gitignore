@@ -1,0 +1,10 @@
+.idea/dataSources.local.xml
+.idea/workspace.xml
+app.log
+batch/target/
+model/src/main/java/
+model/target/
+technical/target/
+.idea/
+.idea/compiler.xml
+.idea/misc.xml
